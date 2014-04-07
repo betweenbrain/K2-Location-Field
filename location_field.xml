@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<install version="1.5" type="plugin" group="k2" method="upgrade">
+	<author>Matt Thomas</author>
+	<authorEmail>matt@betweenbrain.com</authorEmail>
+	<authorUrl>http://betweenbrain.com</authorUrl>
+	<copyright>(C) 2014 Matt Thomas. All rights reserved.</copyright>
+	<creationDate>March 12, 2014</creationDate>
+	<description>PLG_K2_LOCATION_FIELD_DESC</description>
+	<license>GNU/GPL v2 or later</license>
+	<name>K2 - Location Field</name>
+	<version>0.2-alpha</version>
+
+	<files>
+		<filename plugin="location_field">location_field.php</filename>
+		<folder>elements</folder>
+	</files>
+
+	<languages folder="language">
+		<language tag="en-GB">en-GB/en-GB.plg_k2_location_field.ini</language>
+	</languages>
+
+	<!-- K2 plugin parameters which extend K2 backend forms -->
+	<params group="item-extra-fields" addpath="/plugins/k2/elements">
+		<param name="location"
+		       type="location"
+		       size="80"
+		       default=""
+		       label="Location"
+		       class="clonable"
+		       description="" />
+	</params>
+</install>
