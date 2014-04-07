@@ -52,100 +52,17 @@ class plgK2Location_field extends K2Plugin
 						`id`           INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
 						`itemId`       INT(11)          NOT NULL,
 						`locations`    text             NOT NULL,
-						PRIMARY KEY (`id`)
+						PRIMARY KEY (`id`),
+						UNIQUE KEY `itemId` (itemId)
 					)
 						ENGINE =InnoDB
 						AUTO_INCREMENT =0
 						DEFAULT CHARSET =utf8;';
+
 		$this->db->setQuery($query);
 		$this->db->query();
 
 		return true;
-	}
-
-	/**
-	 * Function to return video data based on detected video provider
-	 *
-	 * @param $row
-	 *
-	 * @internal param $item
-	 * @return mixed
-	 */
-	private function getVideoData($row)
-	{
-		// Get the K2 plugin fields
-		$fields        = new K2Parameter($row->plugins, '', $this->pluginName);
-		$videoProvider = $fields->get('videoProvider');
-		$videoID       = $fields->get('videoID');
-
-		// Get the K2 plugin parameters
-		$plugin          =& JPluginHelper::getPlugin('k2', $this->pluginName);
-		$params          = new JParameter($plugin->params);
-		$brightcovetoken = htmlspecialchars($params->get('brightcovetoken'));
-
-		// Check if Brightcove is in the K2 provider field or Media source field embed code
-		if ((strtolower($videoProvider) === 'brightcove') || strstr($row->video, 'brightcove'))
-		{
-			if (!$videoProvider)
-			{
-				preg_match('/@videoPlayer" value="([0-9]*)"/', $row->video, $match);
-				$videoID = $match[1];
-			}
-
-			$json    = file_get_contents('http://api.brightcove.com/services/library?command=find_video_by_id&video_id=' . $videoID . '&video_fields=name,shortDescription,longDescription,publishedDate,lastModifiedDate,videoStillURL,length,playsTotal&token=' . $brightcovetoken);
-			$results = json_decode($json);
-
-			if ($results)
-			{
-				$videoData['title']             = $results->name;
-				$videoData['description_long']  = $results->longDescription;
-				$videoData['description_short'] = $results->shortDescription;
-				$videoData['image']             = $results->videoStillURL;
-				$videoData['views']             = $results->playsTotal;
-				$videoData['duration']          = floor($results->length / (1000 * 60)) . ':' . sprintf("%02d", round(($results->length % (1000 * 60) / 1000)));
-				// Convert Brightcove date (milliseconds since UNIX epoch) to MySQL datetime format
-				$videoData['date_published'] = date('Y-m-d H:i:s', $results->publishedDate / 1000);
-				$videoData['date_modified']  = date('Y-m-d H:i:s', $results->lastModifiedDate / 1000);
-
-				//die('<pre>' . print_r($videoData, TRUE) . '</pre>');
-
-				return $videoData;
-			}
-		}
-
-		// If YouTube is enabled and in the Media source field embed code
-		// TODO: Test use of embed code
-		if ((strtolower($videoProvider) === 'youtube') || strstr($row->video, 'youtube'))
-		{
-			if (!$videoProvider)
-			{
-				preg_match('/\/embed\/([a-zA-Z0-9_-]*)(\?|")/', $row->video, $match);
-				$videoID = $match[1];
-			}
-
-			$json = file_get_contents('https://gdata.youtube.com/feeds/api/videos/' . $videoID . '?v=2&alt=json');
-			// https://developers.google.com/youtube/v3/docs/videos/list
-			// i.e. https://www.googleapis.com/youtube/v3/videos/?id=QfOF0bRBFJ4&part=contentDetails
-			$results = json_decode($json, true);
-
-			// Build the videoData array from the data from YouTube
-			if ($results)
-			{
-				$videoData['title']            = $results['entry']['title']['$t'];
-				$videoData['description_long'] = $results['entry']['media$group']['media$description']['$t'];
-				$videoData['image']            = 'http://i.ytimg.com/vi/' . $videoID . '/sddefault.jpg';
-				$videoData['views']            = $results['entry']['yt$statistics']['viewCount'];
-				// TODO: Check number formatting
-				$videoData['duration'] = $results['entry']['media$group']['media$duration'];
-				// Convert YouTube date (UTC) to MySQL datetime format
-				$videoData['date_published'] = date('Y-m-d H:i:s', strtotime($results['entry']['published']['$t']));
-				$videoData['date_modified']  = date('Y-m-d H:i:s', strtotime($results['entry']['updated']['$t']));
-
-				return $videoData;
-			}
-		}
-
-		return false;
 	}
 
 	/**
@@ -157,25 +74,22 @@ class plgK2Location_field extends K2Plugin
 	function onBeforeK2Save(&$row, $isNew)
 	{
 
-		$app =& JFactory::getApplication();
-
-		if ($app->isAdmin() && $isNew)
+		if (array_key_exists('location_fieldlocation', JRequest::getVar('plugins')))
 		{
+			$plugins = JRequest::getVar('plugins');
 
-			// Retrieve video data from the provider
-			$videoData = $this->getVideoData($row);
+			// Update item's plugins data
+			$query = 'INSERT INTO ' . $this->db->nameQuote('#__k2_items_locations') . '
+					(' . $this->db->nameQuote('itemId') . ',
+					' . $this->db->nameQuote('locations') . ')
+					VALUES (' . $this->db->Quote($row->id) . ',
+					' . $this->db->Quote(json_encode($plugins['location_fieldlocation'])) . ')
+					ON DUPLICATE KEY UPDATE
+					' . $this->db->nameQuote('locations') . ' = ' . $this->db->Quote(json_encode($plugins['location_fieldlocation']));
 
-			// If data is retrieved, update K2 item
-			if ($videoData)
-			{
-				$row->title     = $videoData['title'];
-				$row->alias     = JFilterOutput::stringURLSafe($videoData['title']);
-				$row->introtext = $videoData['description_short'];
-				$row->fulltext  = $videoData['description_long'];
-				$row->created   = $videoData['date_published'];
-				$row->modified  = $videoData['date_modified'];
-				$row->hits      = $videoData['views'];
-			}
+			$this->db->setQuery($query);
+			$this->db->query();
+
 		}
 	}
 
