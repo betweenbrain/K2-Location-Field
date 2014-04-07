@@ -20,9 +20,47 @@ class plgK2Location_field extends K2Plugin
 	var $pluginName = 'location_field';
 	var $pluginNameHumanReadable = 'K2 - Location Field';
 
-	function plgK2Location_field(& $subject, $params)
+	/**
+	 * Construct
+	 *
+	 * @param $subject
+	 * @param $params
+	 */
+	function __construct(&$subject, $params)
 	{
 		parent::__construct($subject, $params);
+		$this->app = JFactory::getApplication();
+		$this->db  = JFactory::getDbo();
+		$this->doc = JFactory::getDocument();
+
+		if ($this->app->isAdmin())
+		{
+			$this->createLocationsTable();
+		}
+
+	}
+
+	/**
+	 * Creates the #__k2_items_locations table if it doesn't already exist
+	 *
+	 * @return bool
+	 */
+	private function createLocationsTable()
+	{
+		$prefix = $this->app->getCfg('dbprefix');
+		$query  = 'CREATE TABLE IF NOT EXISTS `' . $prefix . 'k2_items_locations` (
+						`id`           INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+						`itemId`       INT(11)          NOT NULL,
+						`locations`    text             NOT NULL,
+						PRIMARY KEY (`id`)
+					)
+						ENGINE =InnoDB
+						AUTO_INCREMENT =0
+						DEFAULT CHARSET =utf8;';
+		$this->db->setQuery($query);
+		$this->db->query();
+
+		return true;
 	}
 
 	/**
