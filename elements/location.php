@@ -27,6 +27,11 @@ class JElementLocation extends JElement
 
 		$return = null;
 
+		if (JRequest::getVar('cid') == '' || $value == '')
+		{
+			$value[0] = '';
+		}
+
 		if (!is_array($value))
 		{
 			$value = str_split($value, strlen($value));
