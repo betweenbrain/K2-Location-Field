@@ -27,24 +27,16 @@ class JElementLocation extends JElement
 
 		$return = null;
 
-		if (is_array($value))
+		if (!is_array($value))
 		{
-			foreach ($value as $k => $v)
-			{
-				$return .= '<input type="text"' .
-					'name="' . $control_name . '[' . $name . '][' . $k . ']"' .
-					'id="' . $control_name . '[' . $name . ']"' .
-					'value="' . $v . '"' .
-					'class="' . $class . '" />';
-			}
-
+			$value = str_split($value, strlen($value));
 		}
-		else
+
+		foreach ($value as $k => $v)
 		{
-			$return = '<input type="text"' .
-				'name="' . $control_name . '[' . $name . '][0]"' .
-				'id="' . $control_name . '[' . $name . ']"' .
-				'value="' . $value . '"' .
+			$return .= '<input type="text"' .
+				'name="' . $control_name . '[' . $node->attributes('type') . '][' . $k . ']"' .
+				'value="' . $v . '"' .
 				'class="' . $class . '" />';
 		}
 
@@ -81,4 +73,5 @@ class JElementLocation extends JElement
 
 		$this->doc->addCustomTag($js);
 	}
+
 }
