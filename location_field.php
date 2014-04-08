@@ -65,7 +65,7 @@ class plgK2Location_field extends K2Plugin
 	 * @param $row
 	 * @param $isNew
 	 */
-	function onBeforeK2Save(&$row, $isNew)
+	function onAfterK2Save(&$row, $isNew)
 	{
 
 		if (array_key_exists('location', JRequest::getVar('plugins')))
