@@ -49,12 +49,14 @@ class JElementLocation extends JElement
 			$value = str_split($value, strlen($value));
 		}
 
+		$i = 1;
 		foreach ($value as $k => $v)
 		{
 			$return .= '<input type="text"' .
-				'name="' . $control_name . '[' . $node->attributes('type') . '][' . $k . ']"' .
-				'value="' . $v . '"' .
+				'name="' . $control_name . '[' . $node->attributes('type') . '][' . $i . ']"' .
+				'value="' . $k . '"' .
 				'class="' . $class . '" />';
+			$i++;
 		}
 
 		return $return;
