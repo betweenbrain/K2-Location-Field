@@ -8,11 +8,15 @@
  * Copyright  Copyright (C) 2014 betweenbrain llc. All Rights Reserved.
  * License    GNU GPL v2 or later
  */
+
 class JElementLocation extends JElement
 {
 
 	var $_name = 'Location';
 
+	/**
+	 * Construct
+	 */
 	public function __construct()
 	{
 		$this->app = JFactory::getApplication();
@@ -21,6 +25,16 @@ class JElementLocation extends JElement
 		$this->addScripts();
 	}
 
+	/**
+	 * Fetched the element to display on the page
+	 * 
+	 * @param $name
+	 * @param $value
+	 * @param $node
+	 * @param $control_name
+	 *
+	 * @return null|string|void
+	 */
 	function fetchElement($name, $value, &$node, $control_name)
 	{
 		$class = $node->attributes('class') ? $node->attributes('class') : "text_area";
@@ -38,6 +52,7 @@ class JElementLocation extends JElement
 				' FROM #__k2_items_locations' .
 				' WHERE itemId = ' . $this->db->Quote($id) . '';
 			$this->db->setQuery($query);
+
 			if ($this->db->loadResult() != 'null')
 			{
 				$value = json_decode($this->db->loadResult(), true);
@@ -50,6 +65,7 @@ class JElementLocation extends JElement
 		}
 
 		$i = 0;
+
 		foreach ($value as $k => $v)
 		{
 			$return .= '<input type="text" style="display:block"' .
@@ -63,6 +79,11 @@ class JElementLocation extends JElement
 
 	}
 
+	/**
+	 * Adds necessary JavaScript to page for repeatable field
+	 * 
+	 * @return null
+	 */
 	private function addScripts()
 	{
 
@@ -92,5 +113,4 @@ class JElementLocation extends JElement
 
 		$this->doc->addCustomTag($js);
 	}
-
 }
