@@ -52,7 +52,7 @@ class JElementLocation extends JElement
 		$i = 0;
 		foreach ($value as $k => $v)
 		{
-			$return .= '<input type="text"' .
+			$return .= '<input type="text" style="display:block"' .
 				'name="' . $control_name . '[' . $node->attributes('type') . '][' . $i . ']"' .
 				'value="' . $k . '"' .
 				'class="' . $class . '" />';
