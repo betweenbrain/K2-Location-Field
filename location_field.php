@@ -20,12 +20,6 @@ class plgK2Location_field extends K2Plugin
 	var $pluginName = 'location_field';
 	var $pluginNameHumanReadable = 'K2 - Location Field';
 
-	/**
-	 * Construct
-	 *
-	 * @param $subject
-	 * @param $params
-	 */
 	function __construct(&$subject, $params)
 	{
 		parent::__construct($subject, $params);
@@ -74,7 +68,7 @@ class plgK2Location_field extends K2Plugin
 	function onBeforeK2Save(&$row, $isNew)
 	{
 
-		if (array_key_exists('location_fieldlocation', JRequest::getVar('plugins')))
+		if (array_key_exists('location', JRequest::getVar('plugins')))
 		{
 			$plugins = JRequest::getVar('plugins');
 
@@ -83,9 +77,9 @@ class plgK2Location_field extends K2Plugin
 					(' . $this->db->nameQuote('itemId') . ',
 					' . $this->db->nameQuote('locations') . ')
 					VALUES (' . $this->db->Quote($row->id) . ',
-					' . $this->db->Quote(json_encode($plugins['location_fieldlocation'])) . ')
+					' . $this->db->Quote(json_encode($plugins['location'])) . ')
 					ON DUPLICATE KEY UPDATE
-					' . $this->db->nameQuote('locations') . ' = ' . $this->db->Quote(json_encode($plugins['location_fieldlocation']));
+					' . $this->db->nameQuote('locations') . ' = ' . $this->db->Quote(json_encode($plugins['location']));
 
 			$this->db->setQuery($query);
 			$this->db->query();
