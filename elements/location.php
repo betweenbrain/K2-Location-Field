@@ -49,7 +49,7 @@ class JElementLocation extends JElement
 			$value = str_split($value, strlen($value));
 		}
 
-		$i = 1;
+		$i = 0;
 		foreach ($value as $k => $v)
 		{
 			$return .= '<input type="text"' .
