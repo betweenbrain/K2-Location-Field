@@ -102,6 +102,12 @@ class plgK2Location_field extends K2Plugin
 
 		foreach ($locations as $location)
 		{
+
+			if ($location == '')
+			{
+				continue;
+			}
+
 			$result[$location] = array();
 
 			// Create curl resource
