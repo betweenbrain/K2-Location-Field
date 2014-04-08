@@ -72,14 +72,16 @@ class plgK2Location_field extends K2Plugin
 		{
 			$plugins = JRequest::getVar('plugins');
 
+			$locations = $this->getLatandLong($plugins['location']);
+
 			// Update item's plugins data
 			$query = 'INSERT INTO ' . $this->db->nameQuote('#__k2_items_locations') . '
 					(' . $this->db->nameQuote('itemId') . ',
 					' . $this->db->nameQuote('locations') . ')
 					VALUES (' . $this->db->Quote($row->id) . ',
-					' . $this->db->Quote(json_encode($plugins['location'])) . ')
+					' . $this->db->Quote(json_encode($locations)) . ')
 					ON DUPLICATE KEY UPDATE
-					' . $this->db->nameQuote('locations') . ' = ' . $this->db->Quote(json_encode($plugins['location']));
+					' . $this->db->nameQuote('locations') . ' = ' . $this->db->Quote(json_encode($locations));
 
 			$this->db->setQuery($query);
 			$this->db->query();
@@ -88,58 +90,40 @@ class plgK2Location_field extends K2Plugin
 	}
 
 	/**
-	 * Function to progrmatically populate the plugin's videoImageUrl and videoDuration fields after first save
+	 * Fetch latitude and longitude of human readable locations
 	 *
-	 * @param $row
-	 * @param $isNew
+	 * @param $locations
+	 *
+	 * @return array
 	 */
-	function onAfterK2Save(&$row, $isNew)
+	private function getLatandLong($locations)
 	{
+		$result = array();
 
-		$app =& JFactory::getApplication();
-
-		if ($app->isAdmin() && $isNew)
+		foreach ($locations as $location)
 		{
+			$result[$location] = array();
 
-			// Retrieve video data from the provider
-			$videoData = $this->getVideoData($row);
+			// Create curl resource
+			$ch = curl_init();
 
-			if (is_null($videoData))
-			{
-				//die('<pre>' . print_r($row, TRUE) . '</pre>');
-			}
+			// Set url
+			curl_setopt($ch, CURLOPT_URL, "http://maps.googleapis.com/maps/api/geocode/json?address=" . urlencode($location) . "&sensor=true");
 
-			// Fetch item's exisitng plugins data
-			$db    = JFactory::getDbo();
-			$query = ' SELECT plugins' .
-				' FROM #__k2_items' .
-				' WHERE id = ' . $db->Quote($row->id) . '';
-			$db->setQuery($query);
-			$params = $db->loadResult();
+			// Return the transfer as a string
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
-			// Check for no user entry of videoImageUrl on first creation
-			if (preg_match('/location_fieldvideoImageUrl=\s/', $params))
-			{
-				// Strip empty entry on first save
-				$params = str_replace('location_fieldvideoImageUrl=', '', $params);
-				$params = 'location_fieldvideoImageUrl=' . $videoData['image'] . "\n" . $params;
-			}
+			// $output contains the output string
+			$output = json_decode(curl_exec($ch));
 
-			// Check for no user entry of videoDuration on first creation
-			if (preg_match('/location_fieldvideoDuration=\s/', $params))
-			{
-				// Strip empty entry on first save
-				$params = str_replace('location_fieldvideoDuration=', '', $params);
-				$params = 'location_fieldvideoDuration=' . $videoData['duration'] . "\n" . $params;
-			}
+			// Close curl resource to free up system resources
+			curl_close($ch);
 
-			// Update item's plugins data
-			$query = 'UPDATE #__k2_items' .
-				' SET plugins=' . $db->Quote($params) .
-				' WHERE id = ' . $db->Quote($row->id) . '';
-			$db->setQuery($query);
-			$db->query();
+			$result[$location]['lat'] = $output->results[0]->geometry->location->lat;
+			$result[$location]['lng'] = $output->results[0]->geometry->location->lng;
 		}
+
+		return $result;
 	}
 
 	/**
