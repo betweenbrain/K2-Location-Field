@@ -32,6 +32,18 @@ class JElementLocation extends JElement
 			$value[0] = '';
 		}
 
+		if ($id = JRequest::getVar('cid'))
+		{
+			$query = ' SELECT locations' .
+				' FROM #__k2_items_locations' .
+				' WHERE itemId = ' . $this->db->Quote($id) . '';
+			$this->db->setQuery($query);
+			if ($this->db->loadResult() != 'null')
+			{
+				$value = json_decode($this->db->loadResult(), true);
+			}
+		}
+
 		if (!is_array($value))
 		{
 			$value = str_split($value, strlen($value));
