@@ -8,7 +8,6 @@
  * Copyright  Copyright (C) 2014 betweenbrain llc. All Rights Reserved.
  * License    GNU GPL v2 or later
  */
-
 class JElementLocation extends JElement
 {
 
@@ -27,7 +26,7 @@ class JElementLocation extends JElement
 
 	/**
 	 * Fetched the element to display on the page
-	 * 
+	 *
 	 * @param $name
 	 * @param $value
 	 * @param $node
@@ -41,22 +40,18 @@ class JElementLocation extends JElement
 
 		$return = null;
 
-		if (JRequest::getVar('cid') == '' || $value == '')
+		$query = ' SELECT locations' .
+			' FROM #__k2_items_locations' .
+			' WHERE itemId = ' . $this->db->Quote(JRequest::getVar('cid')) . '';
+		$this->db->setQuery($query);
+
+		if ($this->db->loadResult() != null)
 		{
-			$value[0] = '';
+			$value = json_decode($this->db->loadResult(), true);
 		}
-
-		if ($id = JRequest::getVar('cid'))
+		else
 		{
-			$query = ' SELECT locations' .
-				' FROM #__k2_items_locations' .
-				' WHERE itemId = ' . $this->db->Quote($id) . '';
-			$this->db->setQuery($query);
-
-			if ($this->db->loadResult() != 'null')
-			{
-				$value = json_decode($this->db->loadResult(), true);
-			}
+			$value[] = '';
 		}
 
 		if (!is_array($value))
@@ -81,7 +76,7 @@ class JElementLocation extends JElement
 
 	/**
 	 * Adds necessary JavaScript to page for repeatable field
-	 * 
+	 *
 	 * @return null
 	 */
 	private function addScripts()
