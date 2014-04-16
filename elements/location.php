@@ -51,8 +51,8 @@ class JElementLocation extends JElement
 		}
 		else
 		{
-			$locations['birth']   = '';
-			$locations['primary'] = '';
+			$locations['birth'][]   = '';
+			$locations['primary'][] = '';
 		}
 
 		if (!is_array($locations))
