@@ -20,7 +20,7 @@
 	</languages>
 
 	<!-- K2 plugin parameters which extend K2 backend forms -->
-	<params group="item-extra-fields" addpath="/plugins/k2/elements">
+	<params group="item-other" addpath="/plugins/k2/elements">
 		<param name="location"
 		       type="location"
 		       size="80"
