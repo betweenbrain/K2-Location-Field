@@ -100,57 +100,40 @@ class plgK2Location_field extends K2Plugin
 	{
 		$result = array();
 
-		foreach ($locations as $location)
+		foreach ($locations as $type => $locales)
 		{
+			$result[$type] = array();
 
-			if ($location == '')
+			foreach ($locales as $location)
 			{
-				continue;
+
+				if ($location == '')
+				{
+					continue;
+				}
+
+				$result[$type][$location] = array();
+
+				// Create curl resource
+				$ch = curl_init();
+
+				// Set url
+				curl_setopt($ch, CURLOPT_URL, "http://maps.googleapis.com/maps/api/geocode/json?address=" . urlencode($location) . "&sensor=true");
+
+				// Return the transfer as a string
+				curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+
+				// $output contains the output string
+				$output = json_decode(curl_exec($ch));
+
+				// Close curl resource to free up system resources
+				curl_close($ch);
+
+				$result[$type][$location]['lat'] = $output->results[0]->geometry->location->lat;
+				$result[$type][$location]['lng'] = $output->results[0]->geometry->location->lng;
 			}
-
-			$result[$location] = array();
-
-			// Create curl resource
-			$ch = curl_init();
-
-			// Set url
-			curl_setopt($ch, CURLOPT_URL, "http://maps.googleapis.com/maps/api/geocode/json?address=" . urlencode($location) . "&sensor=true");
-
-			// Return the transfer as a string
-			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-			// $output contains the output string
-			$output = json_decode(curl_exec($ch));
-
-			// Close curl resource to free up system resources
-			curl_close($ch);
-
-			$result[$location]['lat'] = $output->results[0]->geometry->location->lat;
-			$result[$location]['lng'] = $output->results[0]->geometry->location->lng;
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Add plugin fields to the item object for direct access in the template
-	 *
-	 * @param $item
-	 * @param $params
-	 * @param $limitstart
-	 */
-	function onK2PrepareContent(&$item, &$params, $limitstart)
-	{
-		// Get the K2 plugin fields
-		$fields = new K2Parameter($item->plugins, '', $this->pluginName);
-
-		// Add plugin fields to $item object
-		$item->videoProvider = htmlspecialchars($fields->get('videoProvider'));
-		$item->videoID       = htmlspecialchars($fields->get('videoID'));
-		$item->videoImage    = htmlspecialchars($fields->get('videoImageUrl'));
-		$item->videoDuration = htmlspecialchars($fields->get('videoDuration'));
-		$item->videoWidth    = htmlspecialchars($fields->get('videoWidth'));
-		$item->videoHeight   = htmlspecialchars($fields->get('videoHeight'));
-		$item->videoPlayer   = htmlspecialchars($fields->get('videoPlayer'));
 	}
 }

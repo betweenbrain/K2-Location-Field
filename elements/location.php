@@ -47,27 +47,36 @@ class JElementLocation extends JElement
 
 		if ($this->db->loadResult() != null)
 		{
-			$value = json_decode($this->db->loadResult(), true);
+			$locations = json_decode($this->db->loadResult(), true);
 		}
 		else
 		{
-			$value[] = '';
+			$locations['birth']   = '';
+			$locations['primary'] = '';
 		}
 
-		if (!is_array($value))
+		if (!is_array($locations))
 		{
-			$value = str_split($value, strlen($value));
+			$locations = str_split($locations, strlen($locations));
 		}
 
 		$i = 0;
 
-		foreach ($value as $k => $v)
+		foreach ($locations as $type => $locales)
 		{
-			$return .= '<input type="text" style="display:block"' .
-				'name="' . $control_name . '[' . $node->attributes('type') . '][' . $i . ']"' .
-				'value="' . $k . '"' .
-				'class="' . $class . '" />';
-			$i++;
+
+			foreach ($locales as $name => $latlng)
+			{
+
+				$return .= '<fieldset class="' . $class . '">';
+				$return .= '<label>' . ucfirst($type) . '</label>';
+				$return .= '<input type="text" style="display:block"' .
+					'name="' . $control_name . '[' . $node->attributes('type') . '][' . $type . '][' . $i . ']"' .
+					'value="' . $name . '" />';
+				$return .= '</fieldset>';
+
+				$i++;
+			}
 		}
 
 		return $return;
@@ -87,17 +96,23 @@ class JElementLocation extends JElement
 (function ($) {
 	$(document).ready(function() {
 
-	$('.clonable:last').after('<input type=\"button\" class=\"clone\" value=\"+\" />');
+	$('.clonable:last').after('<input type=\"button\" class=\"clone\" data-type=\"primary\" value=\"Add Primary\" /><input type=\"button\" class=\"clone\" data-type=\"birth\" value=\"Add Birth\" />');
 
-	var i = $('.clonable:last').attr('name').match(/\d/);
+	var i = $('.clonable:last input').attr('name').match(/\d/);
 	$('input.clone').on('click', function (event) {
 		i++;
 		$('.clonable:first').clone().insertAfter('.clonable:last');
-		$('.clonable:last').val('');
-		var last = $('.clonable:last').attr('name');
-			var nodeValue = $('.clonable:last').attr('name').match(/\d/),
-				newValue = $('.clonable:last').attr('name').replace(nodeValue, i);
-		$('.clonable:last').attr('name', newValue);
+		$('.clonable:last input').val('');
+		var last = $('.clonable:last input').attr('name');
+			var nodeValue = $('.clonable:last input').attr('name').match(/\d/),
+				newValue = $('.clonable:last input').attr('name').replace(nodeValue, i);
+		$('.clonable:last input').attr('name', newValue);
+
+		if($(this).data('type') == 'birth'){
+			$('.clonable:last label').text('Birth');
+			var newValue = $('.clonable:last input').attr('name').replace(/primary/gi, 'birth');
+			$('.clonable:last input').attr('name', newValue);
+		}
 
 		event.preventDefault();
 		});
