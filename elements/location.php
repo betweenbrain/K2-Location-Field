@@ -101,18 +101,24 @@ class JElementLocation extends JElement
 	var i = $('.clonable:last input').attr('name').match(/\d/);
 	$('input.clone').on('click', function (event) {
 		i++;
+
+		// Clone fieldset
 		$('.clonable:first').clone().insertAfter('.clonable:last');
+
+		// Clear all values
 		$('.clonable:last input').val('');
+
+		// Update Last clonable input attribute index
 		var last = $('.clonable:last input').attr('name');
 			var nodeValue = $('.clonable:last input').attr('name').match(/\d/),
 				newValue = $('.clonable:last input').attr('name').replace(nodeValue, i);
 		$('.clonable:last input').attr('name', newValue);
 
-		if($(this).data('type') == 'birth'){
-			$('.clonable:last label').text('Birth');
-			var newValue = $('.clonable:last input').attr('name').replace(/primary/gi, 'birth');
-			$('.clonable:last input').attr('name', newValue);
-		}
+		// Set clonable fieldset appropriately with label and input name attribute
+		var type = $(this).data('type'),
+		label = type.charAt(0).toUpperCase() + type.slice(1);
+		$('.clonable:last label').text(label);
+		$('.clonable:last input').attr('name', 'plugins[location][' + type + ']['+ i + ']');
 
 		event.preventDefault();
 		});
