@@ -119,6 +119,13 @@ class JElementLocation extends JElement
 		$('.clonable:last label').text(label);
 		$('.clonable:last input').attr('name', 'plugins[location][' + type + ']['+ i + ']');
 
+		// Hide birth once clicked
+		/*
+		if($(this).data('type') == 'birth'){
+			$(this).hide();
+		}
+		*/
+
 		event.preventDefault();
 		});
 
