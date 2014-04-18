@@ -18,7 +18,7 @@ class plgK2Location_field extends K2Plugin
 
 	// Some params
 	var $pluginName = 'location_field';
-	var $pluginNameHumanReadable = 'K2 - Location Field';
+	var $pluginNameHumanReadable = 'Location Field';
 
 	function __construct(&$subject, $params)
 	{
