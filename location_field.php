@@ -72,16 +72,46 @@ class plgK2Location_field extends K2Plugin
 		{
 			$plugins = JRequest::getVar('plugins');
 
-			$locations = $this->getLatandLong($plugins['location']);
+			// Sanitize empty locations
+			foreach ($plugins['location'] as $type => $values)
+			{
+				// Unset any empty location  node
+				foreach ($values as $key => $value)
+				{
+					if (empty($value))
+					{
+						unset($plugins['location'][$type][$key]);
+					}
+				}
 
-			// Update item's plugins data
-			$query = 'INSERT INTO ' . $this->db->nameQuote('#__k2_items_locations') . '
+				// Check first value of each location type array, implies empty array
+				$array = reset($values);
+
+				if (empty($array))
+				{
+					unset($plugins['location'][$type]);
+				};
+			}
+
+			if (count($plugins['location']))
+			{
+				$locations = $this->getLatandLong($plugins['location']);
+
+				// Update item's plugins data
+				$query = 'INSERT INTO ' . $this->db->nameQuote('#__k2_items_locations') . '
 					(' . $this->db->nameQuote('itemId') . ',
 					' . $this->db->nameQuote('locations') . ')
 					VALUES (' . $this->db->Quote($row->id) . ',
 					' . $this->db->Quote(json_encode($locations)) . ')
 					ON DUPLICATE KEY UPDATE
 					' . $this->db->nameQuote('locations') . ' = ' . $this->db->Quote(json_encode($locations));
+
+			}
+			else
+			{
+				$query = 'DELETE FROM ' . $this->db->nameQuote('#__k2_items_locations') . '
+						  WHERE ' . $this->db->nameQuote('itemId') . ' = ' . $this->db->Quote($row->id);
+			}
 
 			$this->db->setQuery($query);
 			$this->db->query();
