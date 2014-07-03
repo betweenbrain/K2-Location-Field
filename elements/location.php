@@ -90,15 +90,16 @@ class JElementLocation extends JElement
 	private function addScripts()
 	{
 
-		$js = "<script>
+		$js = "<script type=\"text/javascript\">
 // Clone last clonable fieldset and increment array value
 (function ($) {
 	$(document).ready(function() {
 
 	$('.clonable:last').after('<input type=\"button\" class=\"clone\" data-type=\"primary\" value=\"Add Primary\" /><input type=\"button\" class=\"clone\" data-type=\"birth\" value=\"Add Birth\" />');
 
+
 	var i = $('.clonable:last input').attr('name').match(/\d/);
-	$('input.clone').on('click', function (event) {
+	$('input.clone').click( function (event) {
 		i++;
 
 		// Clone fieldset
